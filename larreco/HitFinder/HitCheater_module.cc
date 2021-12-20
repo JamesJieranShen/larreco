@@ -22,6 +22,7 @@
 #include "cetlib_except/exception.h"
 
 #include "larcore/Geometry/Geometry.h"
+#include "larcorealg/Geometry/Exceptions.h"
 #include "larcoreobj/SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
 #include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
 #include "lardata/ArtDataHelper/HitCreator.h"
@@ -207,7 +208,18 @@ hit::HitCheater::FindHitsOnChannel(const sim::SimChannel* sc,
           // in the right TPC, now figure out which wire we want
           // this works because there is only one plane option for
           // each WireID in each TPC
-          if (wid.Wire == geo->NearestWire(pos.data(), wid.Plane, wid.TPC, wid.Cryostat))
+          // resolve exceptions
+          auto const& plane = geo->Plane(wid.asPlaneID());
+          geo::WireID wireID;
+          try {
+            wireID = plane.NearestWireID(pos.data());
+          }
+          catch (geo::InvalidWireError const& e) {
+          if (!e.hasSuggestedWire()) throw;
+            wireID = plane.ClosestWireID(e.suggestedWireID());
+          }
+
+          if (wid.Wire == wireID.Wire)
             wireIDSignals[wid][tdc] += edep;
         } // end if in the correct TPC and Cryostat
       }   // end loop over wireids for this channel
