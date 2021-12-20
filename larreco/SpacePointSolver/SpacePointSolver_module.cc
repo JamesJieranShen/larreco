@@ -418,7 +418,7 @@ namespace reco3d {
         std::cout << "Warning: metric increased" << std::endl;
         return;
       }
-      if (fabs(metric - prevMetric) < 1e-3 * fabs(prevMetric)) return;
+      if (fabs(metric - prevMetric) < 1e-6 * fabs(prevMetric)) return;
       prevMetric = metric;
     }
   }
