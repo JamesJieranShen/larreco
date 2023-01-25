@@ -183,9 +183,15 @@ pma::Track3D::InitFromHits(detinfo::DetectorPropertiesData const& detProp,
     v3d_2.SetXYZ(x, y, z);
 
     ClearNodes();
-    AddNode(detProp, v3d_1, tpc, cryo);
-    AddNode(detProp, v3d_2, tpc, cryo);
-
+    // randomly choose which node should be the first one to avoid bias towards +x
+    if (rand()%2 == 0) {
+      AddNode(detProp, v3d_1, tpc, cryo);
+      AddNode(detProp, v3d_2, tpc, cryo);
+    }
+    else {
+      AddNode(detProp, v3d_2, tpc, cryo);
+      AddNode(detProp, v3d_1, tpc, cryo);
+    }
     MakeProjection();
     UpdateHitsRadius();
     Optimize(detProp, 0, 0.01F, false, true, 100);
